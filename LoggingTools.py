@@ -7,6 +7,9 @@ import datetime
 # installed
 import yaml
 
+# custom
+from settings import LoggerSettings
+
 
 
 
@@ -35,13 +38,20 @@ class LoggerFactory:
     logger.warning("This is a warning message")
     """
     
-    def __init__(self, base_config_path='base_logging_config.yaml', app_config_path=None):
+    def __init__(
+        self, 
+        base_config_path=None, 
+        app_config_path=None,
+        logger_settings: LoggerSettings=None
+    ):
         """
         Initializes the LoggerFactory with the paths to the base and application-specific
         logging configuration files.
         """
-        self.base_config_path = base_config_path
-        self.app_config_path = app_config_path
+        
+        self.logger_settings = logger_settings or LoggerSettings()
+        self.base_config_path = base_config_path or self.logger_settings.base_config_path
+        self.app_config_path = app_config_path or self.logger_settings.app_config_path
         self.config = None
     
     def load_config(self):
@@ -80,6 +90,28 @@ class LoggerFactory:
         """
         return logging.getLogger(logger_name)
     
+    def add_logger_from_yaml(self, new_logger_config_path=None):
+        """
+        Adds a new logger configuration from a YAML file.
+        
+        The new logger is merged into the existing logging configuration.
+        """
+        
+        if not new_logger_config_path and self.app_config_path:
+            new_logger_config_path = self.app_config_path 
+        else:
+            raise ValueError("New logger configuration path must be provided.")
+        
+        # Load the new logger configuration from the provided YAML file
+        with open(new_logger_config_path, 'r') as file:
+            new_logger_config = yaml.safe_load(file)
+        
+        # Merge the new logger configuration into the existing config
+        self.config = self.merge_dicts(self.config, new_logger_config)
+        
+        # Reapply the updated logging configuration
+        self.apply_config()
+    
     @staticmethod
     def merge_dicts(a, b):
         """
@@ -91,6 +123,15 @@ class LoggerFactory:
             else:
                 a[key] = value
         return a
+    
+    @staticmethod
+    def is_logger_configured() -> bool:
+        if logging.getLogger().hasHandlers():
+            logging.info("Logging is already configured.")
+            return True
+        else:
+            logging.info("Logging is not configured.")
+            return False
     
     def setup_logger(self):
         """

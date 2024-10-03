@@ -1,3 +1,4 @@
 PyYAML
 pydantic
 pydantic-settings
+boto3

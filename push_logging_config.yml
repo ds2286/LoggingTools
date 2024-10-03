@@ -1,0 +1,5 @@
+loggers:
+  push_logger:
+    level: DEBUG
+    handlers: [file]
+    propagate: no

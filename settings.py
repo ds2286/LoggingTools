@@ -19,7 +19,7 @@ class LoggerSettings(BaseSettings):
     
     class Config:
         env_file="config/env/.env"
-        env_prefix = "APP_"
+        env_prefix = "LOG_"
         extra="ignore"
     
     

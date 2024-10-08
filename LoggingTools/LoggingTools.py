@@ -9,7 +9,7 @@ import datetime
 import yaml
 
 # custom
-from Logger.settings import LoggerSettings
+from LoggingTools.settings import LoggerSettings
 
 
 

@@ -9,8 +9,8 @@ from botocore.exceptions import (
 )
 
 # custom
-from settings import S3Settings
-from LoggingTools import LoggerFactory
+from LoggingTools.settings import S3Settings
+from LoggingTools.LoggingTools import LoggerFactory
 
 
 

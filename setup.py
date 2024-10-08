@@ -12,7 +12,8 @@ setup(
         "PyYAML",
         "pydantic",
         "pydantic-settings",
-        "boto3"
+        "boto3",
+        "setuptools"
     ],
     classifiers=[  # Additional metadata
         'Programming Language :: Python :: 3',

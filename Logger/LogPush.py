@@ -95,6 +95,6 @@ if __name__ == '__main__':
     
     # Create an instance of S3Uploader
     uploader = S3Uploader()
-
+    
     # Upload all files in the directory to the S3 bucket
     uploader.upload_directory()

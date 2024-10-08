@@ -1,4 +1,5 @@
 # library
+from pathlib import Path
 import logging
 import logging.config
 import os
@@ -8,7 +9,7 @@ import datetime
 import yaml
 
 # custom
-from settings import LoggerSettings
+from Logger.settings import LoggerSettings
 
 
 
@@ -41,7 +42,7 @@ class LoggerFactory:
     def __init__(
         self, 
         base_config_path=None, 
-        app_config_path=None,
+        app_config_dict={},
         logger_settings: LoggerSettings=None
     ):
         """
@@ -51,7 +52,7 @@ class LoggerFactory:
         
         self.logger_settings = logger_settings or LoggerSettings()
         self.base_config_path = base_config_path or self.logger_settings.base_config_path
-        self.app_config_path = app_config_path or self.logger_settings.app_config_path
+        self.app_config_dict = app_config_dict or self.logger_settings.app_config_dict
         self.config = None
     
     def load_config(self):
@@ -61,22 +62,41 @@ class LoggerFactory:
         with open(self.base_config_path, 'r') as file:
             base_config = yaml.safe_load(file)
         
-        if self.app_config_path:
-            with open(self.app_config_path, 'r') as file:
-                app_config = yaml.safe_load(file)
-            # Merge application-specific logger configuration with base config
-            self.config = self.merge_dicts(base_config, app_config)
-        else:
-            self.config = base_config
-    
+        self.config = base_config
+        for config_name, config_str in self.app_config_dict.items():
+            
+            config_path = Path(config_str)
+            if config_path.is_file() and config_path.exists():
+                with open(config_str, 'r') as file:
+                    app_config = yaml.safe_load(file)
+                # Merge application-specific logger configuration with base config
+                self.config = self.merge_dicts(self.config, app_config)
+                
     def set_dynamic_log_filename(self):
         """
         Sets a dynamic log file name to ensure a new log file is created for every process execution.
+        This also switch all rotating file handlers to standard file 
+        handlers with dynamic filenames, modifying only the in-memory configuration.
         """
-        if 'handlers' in self.config and 'file' in self.config['handlers']:
+
+        if 'handlers' in self.config:
             log_file_name = f"logs/app_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
-            self.config['handlers']['file']['filename'] = log_file_name
-    
+            for handler_name, handler_config in self.config['handlers'].items():
+                
+                # If the handler is a rotating or timed rotating file handler, switch to FileHandler
+                new_config = {}
+                if handler_config['class'] in ['logging.handlers.RotatingFileHandler', 'logging.handlers.TimedRotatingFileHandler']:
+                    # Change the handler class to FileHandler
+                    new_config['class'] = 'logging.FileHandler'
+                    # Set the dynamic filename
+                    new_config['filename'] = log_file_name
+                    # Ensure the mode and encoding are set appropriately
+                    new_config['mode'] = 'a'  # Append mode
+                    new_config['encoding'] = 'utf-8'
+                    
+                    self.config['handlers'].pop(handler_name)
+                    self.config['handlers'][handler_name] = new_config
+                
     def apply_config(self):
         """
         Applies the final logging configuration.
@@ -133,12 +153,18 @@ class LoggerFactory:
             logging.info("Logging is not configured.")
             return False
     
-    def setup_logger(self):
+    def setup_logger(
+        self,
+        dynamic_log_filename=False
+    ):
         """
         Complete the process of loading configuration, setting dynamic log file name, 
         and applying the configuration.
         """
         self.load_config()
-        self.set_dynamic_log_filename()
+        
+        if dynamic_log_filename:
+            self.set_dynamic_log_filename()
+        
         self.apply_config()
 

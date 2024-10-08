@@ -1,0 +1,35 @@
+version: 1
+formatters:
+  json:
+    class: 'logging.Formatter'
+    format: '[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d] - %(message)s'
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+handlers:
+  json_file:
+    class: logging.FileHandler
+    formatter: json
+    level: DEBUG
+    filename: logs/json_log.log  # Path to the JSON log file
+    mode: 'a'  # Append mode
+    encoding: 'utf-8'
+
+  json_rotating_file:
+    class: logging.handlers.RotatingFileHandler
+    formatter: json  # JSON formatter
+    level: DEBUG
+    filename: logs/json_log.log
+    mode: 'a'
+    encoding: 'utf-8'
+    maxBytes: 10485760  # Rotate when log reaches 10MB
+    backupCount: 5  # Keep last 5 logs
+
+  json_timed_rotating_file:
+    class: logging.handlers.TimedRotatingFileHandler
+    formatter: json  # JSON formatter
+    level: DEBUG
+    filename: logs/json_log.log
+    when: 'midnight'
+    interval: 1  # Rotate daily
+    backupCount: 7  # Keep last 7 days' logs
+    encoding: 'utf-8'

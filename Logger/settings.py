@@ -1,12 +1,18 @@
 # library
-from typing import Optional
+from typing import (
+    Optional,
+    Dict
+)
 
 # installed
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict
 )
-from pydantic import Field
+from pydantic import (
+    Field,
+    model_validator
+)
 
 
 
@@ -14,13 +20,25 @@ from pydantic import Field
 class LoggerSettings(BaseSettings):
     
     base_config_path: str = Field(..., description="Base path for the configuration files", env='BASE_CONFIG_PATH')
-    app_config_path: str = Field(..., description="Application-specific path for the configuration files", env='APP_CONFIG_PATH')
     push_config_path: str = Field(..., description="Path to the configuration file for the push logger", env='PUSH_CONFIG_PATH')
+    app_config_dict: Dict[str, str] = Field(default_factory=dict, description="Dictionary of application-specific logging configurations", env='APP_CONFIG_DICT')
     
     class Config:
         env_file="config/env/.env"
         env_prefix = "LOG_"
         extra="ignore"
+    
+    @model_validator(mode='before')
+    def extract_dict(cls, values):
+        # Extract environment variables that start with deliminter and build the dict
+        dict_values = {}
+        for key, value in values.items():
+            if key.startswith("LOG__".casefold()):
+                dict_key = key.split("__", 1)[-1]
+                dict_values[dict_key] = value
+        # Assign the extracted dictionary to the "my_dict" field
+        values["app_config_dict"] = dict_values
+        return values
     
     
 class S3Settings(BaseSettings):

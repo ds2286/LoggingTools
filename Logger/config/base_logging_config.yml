@@ -1,0 +1,44 @@
+version: 1
+formatters:
+  standard:
+    format: "[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d] - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: standard
+    level: DEBUG
+    stream: ext://sys.stdout
+  
+  file:
+    class: logging.FileHandler
+    formatter: standard
+    level: DEBUG
+    filename: logs/app.log  # Path to the log file
+    mode: 'a'  # Append mode
+    encoding: 'utf-8'
+
+  rotating_file:
+    class: logging.handlers.RotatingFileHandler
+    formatter: standard
+    level: DEBUG
+    filename: logs/app.log
+    mode: 'a'  # Append mode
+    encoding: 'utf-8'
+    maxBytes: 10485760  # Rotate when log file reaches 10 MB (10 * 1024 * 1024 bytes)
+    # backupCount: 5  # Keep the last 5 log files
+
+  timed_rotating_file:
+    class: logging.handlers.TimedRotatingFileHandler
+    formatter: standard
+    level: DEBUG
+    filename: logs/app.log
+    when: 'midnight'  # Rotate logs at midnight
+    interval: 1  # Every 1 day
+    # backupCount: 7  # Keep the last 7 days' logs
+    encoding: 'utf-8'
+
+root:
+  level: DEBUG
+  handlers: [timed_rotating_file]

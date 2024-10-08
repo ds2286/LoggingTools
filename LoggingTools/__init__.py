@@ -1,1 +1,1 @@
-from LoggingTools import LoggingTools
+from LoggingTools import LoggingHelper

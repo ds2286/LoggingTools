@@ -59,6 +59,7 @@ class LoggerFactory:
         """
         Loads the base and application-specific logging configuration from YAML files.
         """
+        
         with open(self.base_config_path, 'r') as file:
             base_config = yaml.safe_load(file)
         
@@ -161,6 +162,8 @@ class LoggerFactory:
         Complete the process of loading configuration, setting dynamic log file name, 
         and applying the configuration.
         """
+        log_dir = Path(f"{os.getcwd()}/logs")
+        log_dir.mkdir(parents=True, exist_ok=True)
         self.load_config()
         
         if dynamic_log_filename:

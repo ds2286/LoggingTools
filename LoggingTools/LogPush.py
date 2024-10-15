@@ -20,7 +20,7 @@ logging_factory = LoggerFactory()
 if LoggerFactory.is_logger_configured():        
     logging_factory.add_logger_from_yaml()
 else:
-    logging_factory.setup_logger()
+    logging_factory.setup_logger(dynamic_log_filename=True)
 
 logger = logging_factory.get_logger("push_logger")
 

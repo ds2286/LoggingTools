@@ -46,6 +46,7 @@ class S3Settings(BaseSettings):
     secret_key: str = Field(..., description="Secret key for the S3 bucket", env='SECRET_KEY')
     endpoint_url: str = Field(..., description="Endpoint URL for the S3 bucket", env='ENDPOINT_URL')
     bucket_name: str = Field(..., description="Name of the S3 bucket", env='BUCKET_NAME')
+    key_prefix: Optional[str] = Field('', description="Prefix for the S3 key", env='KEY_PREFIX')
     region: str = Field('us-east-1', description="Region of the S3 bucket", env='REGION')
     upload_directory: Optional[str] = Field(..., description="Directory to upload to S3", env='UPLOAD_DIRECTORY')
     

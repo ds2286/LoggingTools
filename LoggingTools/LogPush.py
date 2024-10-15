@@ -87,6 +87,8 @@ class S3Uploader:
                 file_path = os.path.join(root, file)
                 # Create S3 key by stripping the base directory from the file path to preserve structure
                 s3_key = os.path.relpath(file_path, directory_to_upload)
+                if self.s3_settings.key_prefix:
+                    s3_key = os.path.join(self.s3_settings.key_prefix, s3_key)
                 self.upload_file(file_path, s3_key)
         
         logger.info(f'Upload of directory {directory_to_upload} complete.')

@@ -17,7 +17,7 @@ from LoggingTools.LoggingHelper import LoggerFactory
 
 # Set up logging
 logging_factory = LoggerFactory()
-if LoggerFactory.is_logger_configured():        
+if LoggerFactory.is_logging_configured():        
     logging_factory.add_logger_from_yaml()
 else:
     logging_factory.setup_logger(dynamic_log_filename=True)

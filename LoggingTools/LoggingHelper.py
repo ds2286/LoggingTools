@@ -146,13 +146,18 @@ class LoggerFactory:
         return a
     
     @staticmethod
-    def is_logger_configured() -> bool:
+    def is_logging_configured() -> bool:
         if logging.getLogger().hasHandlers():
             logging.info("Logging is already configured.")
             return True
         else:
             logging.info("Logging is not configured.")
             return False
+        
+    @staticmethod
+    def is_logger_configured(logger_name: str) -> bool:
+        logger = logging.getLogger(logger_name)
+        return bool(logger.handlers)
     
     def setup_logger(
         self,

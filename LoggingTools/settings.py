@@ -36,7 +36,7 @@ class LoggerSettings(BaseSettings):
             if key.startswith("LOG__".casefold()):
                 dict_key = key.split("__", 1)[-1]
                 dict_values[dict_key] = value
-        # Assign the extracted dictionary to the "my_dict" field
+        # Assign the extracted dictionary to the field
         values["app_config_dict"] = dict_values
         return values
     

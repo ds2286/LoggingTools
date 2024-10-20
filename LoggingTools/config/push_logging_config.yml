@@ -1,5 +1,5 @@
 loggers:
   push_logger:
     level: DEBUG
-    handlers: [timed_rotating_file]
+    handlers: [file,console]
     propagate: no

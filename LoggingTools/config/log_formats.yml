@@ -1,0 +1,66 @@
+- name: format1
+  pattern: "\\[(?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\] (?P<level>[A-Z]+): (?P<message>.+)"
+  columns: ["timestamp", "level", "message"]
+
+- name: format2
+  pattern: "\\(?P<timestamp>\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}\\) - (?P<level>[A-Z]+) - (?P<message>.+)"
+  columns: ["timestamp", "level", "message"]
+
+- name: format3
+  pattern: "\\(?P<timestamp>\\d{2}:\\d{2}:\\d{2}\\) (?P<level>[A-Z]+): (?P<message>.+)"
+  columns: ["timestamp", "level", "message"]
+
+- name: format4
+  pattern: "\\(?P<timestamp>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+Z\\) (?P<level>[A-Z]+) (?P<message>.+)"
+  columns: ["timestamp", "level", "message"]
+
+- name: format5
+  pattern: "\\(?P<timestamp>\\d{2}-[A-Za-z]{3}-\\d{4} \\d{2}:\\d{2}:\\d{2}\\) (?P<level>[A-Z]+) (?P<message>.+)"
+  columns: ["timestamp", "level", "message"]
+
+- name: format6
+  pattern: "(?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}) - (?P<level>[A-Z]+) - (?P<message>.+)"
+  columns: ["timestamp", "level", "message"]
+
+- name: outer_format
+  pattern: "(?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}) - (?P<level>[A-Z]+) - Processing line: (?P<message>.+)"
+  columns: ["timestamp", "level", "message"]
+
+- name: nested_format
+  pattern: "\\[(?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3})\\] \\[(?P<logger>[a-zA-Z_]+)\\] \\[(?P<level>[a-zA-Z]+)\\] (?P<message>.+)"
+  columns: ["timestamp", "logger", "level", "message"]
+
+- name: summary_format
+  pattern: "(?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}) - (?P<level>[A-Z]+) - Successfully processed file: (?P<message>.+)"
+  columns: ["timestamp", "level", "message"]
+
+# # Catch-all for threaded logs with generic messages
+# - name: generic_threaded_log
+#   pattern: "\\[(?P<level>[A-Z]+)\\] (?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}) (?P<logger>[a-zA-Z_\\-]+) \\[(?P<thread_id>\\d+)\\] (?P<message>.+)"
+#   columns: ["level", "timestamp", "logger", "thread_id", "message"]
+
+# - name: nginx_error
+#   pattern: "(?P<timestamp>\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}) \\[(?P<level>[a-zA-Z]+)\\] (?P<pid>\\d+)#(?P<tid>\\d+): \\*(?P<connection_id>\\d+) (?P<message>.+)"
+#   columns: ["timestamp", "level", "pid", "tid", "connection_id", "message"]
+
+# - name: short_generic_format
+#   pattern: "(?P<timestamp>.+?) (?P<level>[A-Z]+): (?P<message>.+)"
+#   columns: ["timestamp", "level", "message"]
+
+# - name: summary_format
+#   pattern: "(?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}) - (?P<level>[A-Z]+) - Successfully processed file: (?P<message>.+)"
+#   columns: ["timestamp", "level", "message"]
+
+# Log format for errors with level, timestamp, logger, thread ID, and message
+# - name: error_code_with_logger_and_thread
+#   pattern: "\\[(?P<level>[A-Z]+)\\] (?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}) (?P<logger>[a-zA-Z_\\-]+) \\[(\\d+)\\] (?P<message>.+)"
+#   columns: ["level", "timestamp", "logger", "thread_id", "message"]
+
+# Catch-all for threaded logs with generic messages
+- name: aws_threaded_log
+  pattern: "\\[(?P<level>[A-Z]+)\\] (?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}) (?P<logger>[a-zA-Z_\\-]+) \\[(?P<thread_id>\\d+)\\] (?P<message>.+)"
+  columns: ["level", "timestamp", "logger", "thread_id", "message"]
+
+- name: aws_threaded_log_simple
+  pattern: "^\\[(?P<level>[A-Z]+)\\] (?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}) (?P<logger>[A-Za-z0-9]+) \\[(?P<thread_id>\\d+)\\] (?P<message>.+)$"
+  columns: ["level", "timestamp", "logger", "thread_id", "message"]

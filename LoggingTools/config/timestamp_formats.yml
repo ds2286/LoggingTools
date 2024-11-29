@@ -1,0 +1,8 @@
+- name: standard_ISO
+  pattern: "%Y-%m-%d %H:%M:%S"
+- name: slash_separated
+  pattern: "%Y/%m/%d %H:%M:%S"
+- name: dash_separated_day
+  pattern: "%d-%b-%Y %H:%M:%S"
+- name: ISO8601
+  pattern: "%Y-%m-%dT%H:%M:%S.%fZ"

@@ -1,5 +1,19 @@
 from setuptools import setup, find_packages
 
+extras = {
+    "s3_tools": [
+        "boto3",
+        "S3Tools @ git+https://github.com/EpiGenomicsCode/S3Tools.git"
+    ],
+    'database': [
+        "psycopg",
+        
+    ]
+}
+
+# Dynamically create the 'all' group
+extras['all'] = sum(extras.values(), [])
+
 setup(
     name='LoggingTools',
     version='0.1.0', 
@@ -12,9 +26,9 @@ setup(
         "PyYAML",
         "pydantic",
         "pydantic-settings",
-        "boto3",
         "setuptools"
     ],
+    extras_require=extras,
     classifiers=[  # Additional metadata
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',

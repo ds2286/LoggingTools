@@ -4,6 +4,14 @@ import logging
 import logging.config
 import os
 import datetime
+import sys
+
+current_directory = os.path.dirname(os.path.abspath(__file__))
+parent_directory = os.path.dirname(current_directory)
+
+# Add directory to the sys.path
+if parent_directory not in sys.path:
+    sys.path.append(parent_directory)
 
 # installed
 import yaml
@@ -12,7 +20,11 @@ import yaml
 from LoggingTools.settings import LoggerSettings
 
 
-
+FILE_TYPE_CLASSES = [
+    'logging.FileHandler',
+    'logging.handlers.RotatingFileHandler',
+    'logging.handlers.TimedRotatingFileHandler',
+]
 
 class LoggerFactory:
     """Logger factory class that loads logging configuration from YAML files,
@@ -73,31 +85,61 @@ class LoggerFactory:
                 # Merge application-specific logger configuration with base config
                 self.config = self.merge_dicts(self.config, app_config)
                 
-    def set_dynamic_log_filename(self):
+    def set_log_filename(
+        self,
+        dynamic_log_filename=False
+    ):
         """
         Sets a dynamic log file name to ensure a new log file is created for every process execution.
         This also switch all rotating file handlers to standard file 
         handlers with dynamic filenames, modifying only the in-memory configuration.
         """
 
-        if 'handlers' in self.config:
-            log_file_name = f"logs/app_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
-            for handler_name, handler_config in self.config['handlers'].items():
+        if 'handlers' not in self.config:
+            return
+            
+        for logger_name,logger_values in self.config['loggers'].items():
+            if logger_name == "root":
+                continue
+        
+            specific_filename = logger_values.pop("filename", None)
+            default_filename = self.logger_settings.filename or \
+                self.config['handlers']['file']['filename']
+            log_filename = specific_filename or default_filename
+            full_path = f"{self.logger_settings.directory_name}/{log_filename}"
+            
+            if dynamic_log_filename:
+                # Remove file class handlers from the logger
+                logger_values["handlers"] = [
+                    h for h in logger_values.get("handlers", [])
+                    if self.config['handlers'].get(h, {}).get('class') 
+                    not in FILE_TYPE_CLASSES
+                ]
                 
-                # If the handler is a rotating or timed rotating file handler, switch to FileHandler
-                new_config = {}
-                if handler_config['class'] in ['logging.handlers.RotatingFileHandler', 'logging.handlers.TimedRotatingFileHandler']:
-                    # Change the handler class to FileHandler
-                    new_config['class'] = 'logging.FileHandler'
-                    # Set the dynamic filename
-                    new_config['filename'] = log_file_name
-                    # Ensure the mode and encoding are set appropriately
-                    new_config['mode'] = 'a'  # Append mode
-                    new_config['encoding'] = 'utf-8'
+                log_filename_list = log_filename.split('.')
+                now_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                log_filename = \
+                f"{self.logger_settings.directory_name}/" + \
+                f"{log_filename_list[0]}_{now_time}.{log_filename_list[1]}"
+            
+            # Assign determined filename to the appropriate handler
+            if specific_filename:
                     
-                    self.config['handlers'].pop(handler_name)
-                    self.config['handlers'][handler_name] = new_config
+                # Create a custom handler for the logger
+                special_handler = self.config['handlers']['file'].copy()
+                special_handler['filename'] = full_path
+
+                handler_name = f"{logger_name}_handler"
+                self.config['handlers'][handler_name] = special_handler
+
+                logger_values["handlers"] = [
+                    h for h in logger_values["handlers"] if h != "file"
+                ] + [handler_name]
                 
+            else:
+                # Use the default file handler
+                self.config['handlers']['file']['filename'] = full_path
+            
     def apply_config(self):
         """
         Applies the final logging configuration.
@@ -118,9 +160,7 @@ class LoggerFactory:
         The new logger is merged into the existing logging configuration.
         """
         
-        if not new_logger_config_path and self.app_config_path:
-            new_logger_config_path = self.app_config_path 
-        else:
+        if not new_logger_config_path:
             raise ValueError("New logger configuration path must be provided.")
         
         # Load the new logger configuration from the provided YAML file
@@ -167,12 +207,14 @@ class LoggerFactory:
         Complete the process of loading configuration, setting dynamic log file name, 
         and applying the configuration.
         """
-        log_dir = Path(f"{os.getcwd()}/logs")
+        # log_dir = Path(f"{os.getcwd()}/logs")
+        log_dir = Path(self.logger_settings.directory_name)
         log_dir.mkdir(parents=True, exist_ok=True)
         self.load_config()
         
-        if dynamic_log_filename:
-            self.set_dynamic_log_filename()
-        
+        self.set_log_filename(
+            dynamic_log_filename=dynamic_log_filename
+        )
+
         self.apply_config()
 

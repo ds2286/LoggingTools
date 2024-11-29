@@ -1,0 +1,16 @@
+loggers:
+  s3_manager_logger:
+    level: INFO
+    handlers: [file,console]
+    propagate: no
+    filename: s3_manager.log
+  boto3:
+    level: INFO
+    handlers: [file,console]
+    propagate: no
+    filename: s3_manager.log
+  botocore:
+    level: INFO
+    handlers: [file,console]
+    propagate: no
+    filename: s3_manager.log

@@ -101,6 +101,76 @@ pip install -e .[all]
 
 ## Usage
 
+### LoggingHelper
+
+ Analysis
+
+1. **Key Components**:
+- LoggerFactory class manages logger configuration and creation
+- Uses YAML configuration files
+- Supports dynamic file naming
+- Handles special filename parameter
+
+2. **Configuration Flow**:
+```python
+# 1. Initialize with config path
+logger_factory = LoggerFactory(config_path="config/some_config.yml")
+
+# 2. During setup_logger():
+- Loads YAML config
+- Processes any 'filename' parameters in logger configs
+- Creates file handlers
+- Applies configuration via dictConfig
+```
+
+3. **Adding a New Logger**:
+
+Create YAML config with structure:
+```yaml
+loggers:
+  my_new_logger:    # Logger name to use when getting instance
+    level: INFO     # Log level
+    handlers: [file, console]  # Which handlers to use  
+    propagate: no   # Don't bubble logs up
+    filename: my_process.log   # Special param - creates FileHandler
+```
+
+The `filename` parameter is special:
+- Not standard Python logging config
+- LoggerFactory pops it during setup
+- Creates FileHandler with specified path
+- Removes filename from final config
+
+4. **Usage**:
+```python
+# Get configured logger
+logger = logger_factory.get_logger("my_new_logger")
+```
+
+This pattern allows custom log files while maintaining standard logging configuration structure.
+
+> [!IMPORTANT]  
+> All the log files are annotated in the env file.
+> The log file paths should have a double underscore in the name (LOG__)
+> During the import:
+> ```python
+> @model_validator(mode='before')
+> def extract_dict(cls, values):
+>     # Extract environment variables that start with deliminter and build the dict
+>     dict_values = {}
+>     for key, value in values.items():
+>         if key.startswith("LOG__".casefold()):
+>             dict_key = key.split("__", 1)[-1]
+>             dict_values[dict_key] = value
+>     # Assign the extracted dictionary to the field
+>     values["app_config_dict"] = dict_values
+>     return values
+> ```
+> This collects all the paths of the yaml log config files.  
+> Then during the intialization of the Logger Factory,  
+> they are imported into dictionaries, concatenated,  
+> and added to the logging config before it's applied.  
+
 Basic logging setup:
 ```python
 from LoggingTools.LoggingHelper import LoggerFactory

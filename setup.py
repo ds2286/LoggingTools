@@ -5,9 +5,8 @@ extras = {
         "boto3",
         "S3Tools @ git+https://github.com/EpiGenomicsCode/S3Tools.git"
     ],
-    'database': [
-        "psycopg",
-        
+    "database": [
+        "dbTools @ git+https://github.com/EpiGenomicsCode/dbTools.git"
     ]
 }
 

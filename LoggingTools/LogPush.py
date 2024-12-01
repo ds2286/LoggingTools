@@ -1,11 +1,20 @@
+# library
+import logging
 import os
+
+# installed
 import boto3
 from botocore.exceptions import (
     NoCredentialsError, 
     ClientError
 )
+
+# custom
 from LoggingTools.settings import S3Settings
 from LoggingTools.LoggingHelper import LoggerFactory
+
+
+
 
 # Set up logging
 logging_factory = LoggerFactory()
@@ -99,6 +108,18 @@ class S3Uploader:
         
         logger.info(f'Upload of directory {directory_to_upload} complete.')
 
+
+# Function to get the log file path
+def get_log_file_path(logger) -> str:
+    """
+    Get the log file path from the logger.
+    :param logger: Logger object
+    :return: Log file path
+    """
+    for handler in logger.handlers:
+        if isinstance(handler, logging.FileHandler):
+            return handler.baseFilename
+    return None
 
 
 def push_logs(

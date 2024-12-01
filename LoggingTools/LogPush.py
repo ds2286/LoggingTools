@@ -101,7 +101,17 @@ class S3Uploader:
 
 
 
-def push_logs(env_path: str = os.getenv("ENV_PATH")):
+def push_logs(
+    directory_to_upload: str = None,
+    env_path: str = os.getenv("ENV_PATH"),
+    use_filename_only: bool = True
+):
+    """ Push logs to S3 bucket.
+    
+    :param directory_to_upload: Local directory path to upload
+    :param env_path: Path to the environment file
+    :param use_filename_only: If True, only the file name is used with the S3 key.
+    """
     
     # Create an instance of S3Uploader
     uploader = S3Uploader(
@@ -111,7 +121,10 @@ def push_logs(env_path: str = os.getenv("ENV_PATH")):
     )
     
     # Upload all files in the directory to the S3 bucket
-    uploader.upload_directory()
+    uploader.upload_directory(
+        directory_to_upload=directory_to_upload,
+        use_filename_only=use_filename_only
+    )
 
 if __name__ == '__main__':
     

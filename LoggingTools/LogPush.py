@@ -72,23 +72,34 @@ class S3Uploader:
             logger.info(f'Failed to upload {file_path} to S3: {e}')
 
     def upload_directory(
-        self, 
-        directory_to_upload: str=None
+        self,
+        directory_to_upload: str = None,
+        use_filename_only: bool = False
     ):
         """
-        Upload all files in the directory to S3, preserving the directory structure.
-        :param directory: Local directory path to upload
+        Upload all files in the directory to S3, preserving the directory structure
+        unless use_filename_only is True.
+        
+        :param directory_to_upload: Local directory path to upload
+        :param use_filename_only: If True, only the file name is used as the S3 key.
         """
         if not directory_to_upload:
             directory_to_upload = self.s3_settings.upload_directory
-        
+
         for root, _, files in os.walk(directory_to_upload):
             for file in files:
                 file_path = os.path.join(root, file)
-                # Create S3 key by stripping the base directory from the file path to preserve structure
-                s3_key = os.path.relpath(file_path, directory_to_upload)
+                
+                # Determine the S3 key based on use_filename_only
+                if use_filename_only:
+                    s3_key = file  # Only the file name
+                else:
+                    # Create S3 key by stripping the base directory from the file path to preserve structure
+                    s3_key = os.path.relpath(file_path, directory_to_upload)
+                
                 if self.s3_settings.key_prefix:
                     s3_key = os.path.join(self.s3_settings.key_prefix, s3_key)
+                
                 self.upload_file(file_path, s3_key)
         
         logger.info(f'Upload of directory {directory_to_upload} complete.')

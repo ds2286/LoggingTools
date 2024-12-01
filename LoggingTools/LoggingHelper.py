@@ -114,6 +114,11 @@ class LoggerFactory:
             log_filename = specific_filename or default_filename
             full_path = f"{self.logger_settings.directory_name}/{log_filename}"
             
+            if "{0}" in log_filename:
+                log_filename = log_filename.format(
+                    datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                )
+            
             if dynamic_log_filename:
                 # Remove file class handlers from the logger
                 logger_values["handlers"] = [

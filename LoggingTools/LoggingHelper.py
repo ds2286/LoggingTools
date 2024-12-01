@@ -107,8 +107,11 @@ class LoggerFactory:
         for logger_name,logger_values in self.config['loggers'].items():
             if logger_name == "root":
                 continue
-        
+                
+            # custom settings
             specific_filename = logger_values.pop("filename", None)
+            add_to = logger_values.pop("add_to", [])
+            
             default_filename = self.logger_settings.filename or \
                 self.config['handlers']['file']['filename']
             log_filename = specific_filename or default_filename
@@ -146,6 +149,10 @@ class LoggerFactory:
                 logger_values["handlers"] = [
                     h for h in logger_values["handlers"] if h != "file"
                 ] + [handler_name]
+                
+                if add_to:
+                    for name_of_logger in add_to:
+                        self.config['loggers'][name_of_logger]['handlers'] += [handler_name]
                 
             else:
                 # Use the default file handler

@@ -1,19 +1,11 @@
-# library
 import os
-
-# installed
 import boto3
 from botocore.exceptions import (
     NoCredentialsError, 
     ClientError
 )
-
-# custom
 from LoggingTools.settings import S3Settings
 from LoggingTools.LoggingHelper import LoggerFactory
-
-
-
 
 # Set up logging
 logging_factory = LoggerFactory()
@@ -28,7 +20,7 @@ logger = logging_factory.get_logger("push_logger")
 class S3Uploader:
     def __init__(
         self, 
-        s3_settings: S3Settings=None
+        s3_settings: S3Settings = None
     ):
         """
         Initialize the S3Uploader with credentials and bucket information.
@@ -50,7 +42,7 @@ class S3Uploader:
 
     def upload_file(self, file_path: str, s3_key: str):
         """
-        Upload a single file to S3.
+        Upload a single file to S3 and delete it locally if the upload is successful.
         :param file_path: Local path of the file to upload
         :param s3_key: S3 key for the file in the bucket
         """
@@ -61,15 +53,18 @@ class S3Uploader:
                 s3_key
             )
             logger.info(
-                f"Successfully uploaded {file_path} " + \
-                "to {self.s3_settings.bucket_name}/{s3_key}"
+                f"Successfully uploaded {file_path} " +
+                f"to {self.s3_settings.bucket_name}/{s3_key}"
             )
+            # Remove the file locally after successful upload
+            os.remove(file_path)
+            logger.info(f"Deleted local file {file_path} after upload.")
         except FileNotFoundError:
-            logger.info(f'File {file_path} not found.')
+            logger.error(f'File {file_path} not found.')
         except NoCredentialsError:
-            logger.info('Credentials not available.')
+            logger.error('Credentials not available.')
         except ClientError as e:
-            logger.info(f'Failed to upload {file_path} to S3: {e}')
+            logger.error(f'Failed to upload {file_path} to S3: {e}')
 
     def upload_directory(
         self,
@@ -105,7 +100,6 @@ class S3Uploader:
         logger.info(f'Upload of directory {directory_to_upload} complete.')
 
 if __name__ == '__main__':
-    
     # Create an instance of S3Uploader
     uploader = S3Uploader()
     

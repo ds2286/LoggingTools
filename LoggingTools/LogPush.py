@@ -99,9 +99,20 @@ class S3Uploader:
         
         logger.info(f'Upload of directory {directory_to_upload} complete.')
 
-if __name__ == '__main__':
+
+
+def push_logs(env_path: str = os.getenv("ENV_PATH")):
+    
     # Create an instance of S3Uploader
-    uploader = S3Uploader()
+    uploader = S3Uploader(
+        s3_settings=S3Settings(
+            _env_file=env_path
+        )
+    )
     
     # Upload all files in the directory to the S3 bucket
     uploader.upload_directory()
+
+if __name__ == '__main__':
+    
+    push_logs()

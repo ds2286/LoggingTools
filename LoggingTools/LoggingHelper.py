@@ -74,6 +74,12 @@ class LoggerFactory:
         
         with open(self.base_config_path, 'r') as file:
             base_config = yaml.safe_load(file)
+            
+        if self.logger_settings.push_config_path:
+            with open(self.logger_settings.push_config_path, 'r') as file:
+                push_config = yaml.safe_load(file)
+            # Merge push logger configuration with base config
+            base_config = self.merge_dicts(base_config, push_config)
         
         self.config = base_config
         for config_name, config_str in self.app_config_dict.items():

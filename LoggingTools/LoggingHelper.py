@@ -83,7 +83,6 @@ class LoggerFactory:
             base_config = self.merge_dicts(base_config, push_config)
         
         self.config = base_config
-        self.default_file_handler = self.config['handlers']['file']
         for config_name, config_str in self.app_config_dict.items():
             
             config_path = Path(config_str)
@@ -167,6 +166,7 @@ class LoggerFactory:
         """
         if self.config:
             logging.config.dictConfig(self.config)
+            self.default_file_handler = logging.getHandlerByName('file')
     
     def get_logger(self, logger_name='root'):
         """

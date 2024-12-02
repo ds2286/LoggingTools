@@ -116,6 +116,7 @@ class LoggerFactory:
                 self.config['handlers']['file']['filename']
             log_filename = specific_filename or default_filename
             full_path = f"{self.logger_settings.directory_name}/{log_filename}"
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
             
             if "{0}" in log_filename:
                 log_filename = log_filename.format(

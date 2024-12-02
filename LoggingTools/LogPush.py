@@ -16,24 +16,31 @@ from LoggingTools.LoggingHelper import LoggerFactory
 
 
 
-# Set up logging
-logging_factory = LoggerFactory()
-if LoggerFactory.is_logging_configured():        
-    logging_factory.add_logger_from_yaml()
-else:
-    logging_factory.setup_logger(dynamic_log_filename=True)
 
-logger = logging_factory.get_logger("push_logger")
 
 
 class S3Uploader:
     def __init__(
-        self, 
-        s3_settings: S3Settings = None
+        self,
+        s3_settings: S3Settings = None,
+        logger_config_path: str = None
     ):
         """
         Initialize the S3Uploader with credentials and bucket information.
         """
+
+        # Set up logging
+        logging_factory = LoggerFactory()
+        if LoggerFactory.is_logging_configured():        
+            if logger_config_path:
+                logging_factory.add_logger_from_yaml(
+                    new_logger_config_path=logger_config_path
+                )
+        else:
+            logging_factory.setup_logger()
+
+        self.logger = logging_factory.get_logger("push_logger")
+        
         self.s3_settings = s3_settings or S3Settings()
         self.s3_client = self._create_s3_client()
 
@@ -61,19 +68,19 @@ class S3Uploader:
                 self.s3_settings.bucket_name, 
                 s3_key
             )
-            logger.info(
+            self.logger.info(
                 f"Successfully uploaded {file_path} " +
                 f"to {self.s3_settings.bucket_name}/{s3_key}"
             )
             # Remove the file locally after successful upload
             os.remove(file_path)
-            logger.info(f"Deleted local file {file_path} after upload.")
+            self.logger.info(f"Deleted local file {file_path} after upload.")
         except FileNotFoundError:
-            logger.error(f'File {file_path} not found.')
+            self.logger.error(f'File {file_path} not found.')
         except NoCredentialsError:
-            logger.error('Credentials not available.')
+            self.logger.error('Credentials not available.')
         except ClientError as e:
-            logger.error(f'Failed to upload {file_path} to S3: {e}')
+            self.logger.error(f'Failed to upload {file_path} to S3: {e}')
 
     def upload_directory(
         self,
@@ -106,7 +113,7 @@ class S3Uploader:
                 
                 self.upload_file(file_path, s3_key)
         
-        logger.info(f'Upload of directory {directory_to_upload} complete.')
+        self.logger.info(f'Upload of directory {directory_to_upload} complete.')
 
 
 # Function to get the log file path

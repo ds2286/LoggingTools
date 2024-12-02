@@ -66,6 +66,7 @@ class LoggerFactory:
         self.base_config_path = base_config_path or self.logger_settings.base_config_path
         self.app_config_dict = app_config_dict or self.logger_settings.app_config_dict
         self.config = None
+        self.default_file_handler = None
     
     def load_config(self):
         """
@@ -82,6 +83,7 @@ class LoggerFactory:
             base_config = self.merge_dicts(base_config, push_config)
         
         self.config = base_config
+        self.default_file_handler = self.config['handlers']['file']
         for config_name, config_str in self.app_config_dict.items():
             
             config_path = Path(config_str)

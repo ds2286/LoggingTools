@@ -62,7 +62,9 @@ class LoggerFactory:
         logging configuration files.
         """
         
-        self.logger_settings = logger_settings or LoggerSettings()
+        self.logger_settings = logger_settings or LoggerSettings(
+            _env_file=os.getenv("ENV_PATH")
+        )
         self.base_config_path = base_config_path or self.logger_settings.base_config_path
         self.app_config_dict = app_config_dict or self.logger_settings.app_config_dict
         self.config = None

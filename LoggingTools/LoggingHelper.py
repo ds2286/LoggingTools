@@ -118,8 +118,8 @@ class LoggerFactory:
             full_path = f"{self.logger_settings.directory_name}/{log_filename}"
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             
-            if "{0}" in log_filename:
-                log_filename = log_filename.format(
+            if "{0}" in full_path:
+                full_path = full_path.format(
                     datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
                 )
             

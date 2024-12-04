@@ -70,29 +70,35 @@ class LoggerFactory:
         self.config = None
         self.default_file_handler = None
     
-    def load_config(self):
+    def load_config(
+        self,
+        config_dict: dict = {}
+    ):
         """
         Loads the base and application-specific logging configuration from YAML files.
         """
         
-        with open(self.base_config_path, 'r') as file:
-            base_config = yaml.safe_load(file)
-            
-        if self.logger_settings.push_config_path:
-            with open(self.logger_settings.push_config_path, 'r') as file:
-                push_config = yaml.safe_load(file)
-            # Merge push logger configuration with base config
-            base_config = self.merge_dicts(base_config, push_config)
+        if config_dict:
+            self.config = config_dict
+        else:
+            with open(self.base_config_path, 'r') as file:
+                base_config = yaml.safe_load(file)
+                
+            if self.logger_settings.push_config_path:
+                with open(self.logger_settings.push_config_path, 'r') as file:
+                    push_config = yaml.safe_load(file)
+                # Merge push logger configuration with base config
+                base_config = self.merge_dicts(base_config, push_config)
         
-        self.config = base_config
-        for config_name, config_str in self.app_config_dict.items():
-            
-            config_path = Path(config_str)
-            if config_path.is_file() and config_path.exists():
-                with open(config_str, 'r') as file:
-                    app_config = yaml.safe_load(file)
-                # Merge application-specific logger configuration with base config
-                self.config = self.merge_dicts(self.config, app_config)
+            self.config = base_config
+            for config_name, config_str in self.app_config_dict.items():
+                
+                config_path = Path(config_str)
+                if config_path.is_file() and config_path.exists():
+                    with open(config_str, 'r') as file:
+                        app_config = yaml.safe_load(file)
+                    # Merge application-specific logger configuration with base config
+                    self.config = self.merge_dicts(self.config, app_config)
                 
     def set_log_filename(
         self,
@@ -224,7 +230,8 @@ class LoggerFactory:
     
     def setup_logger(
         self,
-        dynamic_log_filename=False
+        dynamic_log_filename=False,
+        config_dict: dict = {}
     ):
         """
         Complete the process of loading configuration, setting dynamic log file name, 
@@ -233,7 +240,7 @@ class LoggerFactory:
         # log_dir = Path(f"{os.getcwd()}/logs")
         log_dir = Path(self.logger_settings.directory_name)
         log_dir.mkdir(parents=True, exist_ok=True)
-        self.load_config()
+        self.load_config(config_dict=config_dict)
         
         self.set_log_filename(
             dynamic_log_filename=dynamic_log_filename

@@ -15,12 +15,18 @@ extras['all'] = sum(extras.values(), [])
 
 setup(
     name='LoggingTools',
-    version='0.2.0', 
+    version='0.2.1', 
     description='This standardizes the logging for python applications.',
     author='David Saroka',  
     author_email='ds2286@cornell.edu',  
     url='https://github.com/EpiGenomicsCode/LoggingTools.git',
     packages=find_packages(),  # Automatically finds all packages
+    package_data={
+        'LoggingTools': [
+            'base_logging_config.yml', 
+            'push_logging_config.yml'
+        ]
+    },
     install_requires=[  # List of dependencies
         "PyYAML",
         "pydantic",

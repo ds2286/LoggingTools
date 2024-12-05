@@ -419,19 +419,19 @@ class LoggerFactory:
         return file_paths
     
     @staticmethod
-    def load_file_content_from_package(
+    def load_yaml_from_package(
         package: str, 
         filename: str
-    ) -> str:
+    ) -> dict:
         """
-        Load the content of a file from a package.
+        Load the content of a YAML file from a package into a dictionary.
         
         :param package: The package containing the file.
         :param filename: The name of the file to load.
         :return: The content of the file.
         """
-        with importlib.resources.open_text(package, filename) as file:
-            return file.read()
+
+        return yaml.safe_load(importlib.resources.open_text(package, filename))
         
     @staticmethod
     def replace_logger_handlers(

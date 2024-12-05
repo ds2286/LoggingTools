@@ -14,6 +14,7 @@ from logging.config import (
     dictConfig,
     valid_ident
 )
+import importlib.resources
 import logging.config
 import logging
 import datetime
@@ -384,6 +385,35 @@ class LoggerFactory:
     def is_logger_configured(logger_name: str) -> bool:
         logger = logging.getLogger(logger_name)
         return bool(logger.handlers)
+    
+    @staticmethod
+    def load_from_package(
+        package: str, 
+        filenames: list[str] = None, 
+        collect_all: bool = False
+    ) -> dict[str, str]:
+        """
+        Load file paths from a package into a dictionary.
+        
+        :param package: The package containing the files.
+        :param filenames: A list of filenames to retrieve paths for. Ignored if `collect_all` is True.
+        :param collect_all: If True, collect paths for all files in the package directory.
+        :return: A dictionary where keys are filenames and values are their paths.
+        """
+        file_paths = {}
+
+        if collect_all:
+            # Collect all file paths in the package directory
+            for file in importlib.resources.files(package).iterdir():
+                if file.is_file():  # Ensure it's a file, not a subdirectory
+                    file_paths[file.name] = str(file)
+        elif filenames:
+            # Collect specified file paths
+            for filename in filenames:
+                with importlib.resources.path(package, filename) as file_path:
+                    file_paths[filename] = str(file_path)
+        
+        return file_paths
     
     def setup_logger(
         self,

@@ -3,7 +3,8 @@ objects:
     class: queue.Queue
     maxsize: -1
 
-queue_listener:
+handlers:
+  queue_listener:
     class: LoggingTools.LoggingHelper.QueueListenerHandler
     handlers:
       - cfg://handlers.console

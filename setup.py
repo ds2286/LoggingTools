@@ -15,7 +15,7 @@ extras['all'] = sum(extras.values(), [])
 
 setup(
     name='LoggingTools',
-    version='0.3.2', 
+    version='0.3.3', 
     description='This standardizes the logging for python applications.',
     author='David Saroka',  
     author_email='ds2286@cornell.edu',  

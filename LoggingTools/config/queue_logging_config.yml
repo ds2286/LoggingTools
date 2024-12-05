@@ -4,7 +4,4 @@ handlers:
     handlers:
       - cfg://handlers.console
       - cfg://handlers.file
-    queue:
-      class: queue.Queue
-      maxsize: -1
     respect_handler_level: True

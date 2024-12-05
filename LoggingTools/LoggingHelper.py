@@ -93,7 +93,7 @@ class QueueListenerHandler(QueueHandler):
             self.start()
             atexit.register(self.stop)
 
-    def _resolve_handlers(self, handler_list: Union[List[Handler], "ConvertingList"]) -> List[Handler]:
+    def _resolve_handlers(self, handler_list: Union[List[Handler], ConvertingList]) -> List[Handler]:
         """
         Resolves and evaluates handler objects from a list or ConvertingList.
 
@@ -109,7 +109,7 @@ class QueueListenerHandler(QueueHandler):
         # Indexing the list performs the evaluation.
         return [handler_list[i] for i in range(len(handler_list))]
 
-    def _resolve_object(self, obj: Union[Queue, "ConvertingDict"]) -> Queue:
+    def _resolve_object(self, obj: Union[Queue, ConvertingDict]) -> Queue:
         """
         Resolves an object dynamically, such as a queue or other configuration object.
 

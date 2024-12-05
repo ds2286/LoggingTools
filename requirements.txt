@@ -3,3 +3,4 @@ pydantic
 pydantic-settings
 boto3
 setuptools
+python-json-logger

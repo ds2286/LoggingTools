@@ -50,6 +50,26 @@ FILE_TYPE_CLASSES = [
 ]
 
 
+def resolve_class(class_name: str):
+    """
+    Dynamically resolves a class from its full module path.
+
+    Args:
+        class_name (str): The fully qualified class name (e.g., "queue.Queue").
+
+    Returns:
+        type: The resolved class object.
+
+    Raises:
+        ImportError: If the module or class cannot be resolved.
+    """
+    try:
+        module_name, class_name = class_name.rsplit('.', 1)
+        module = importlib.import_module(module_name)
+        return getattr(module, class_name)
+    except (ImportError, AttributeError) as e:
+        raise ImportError(f"Error resolving class {class_name}: {e}") from e
+
 class QueueListenerHandler(QueueHandler):
     """
     A custom logging handler that uses a QueueListener to manage log handlers.
@@ -110,12 +130,12 @@ class QueueListenerHandler(QueueHandler):
         # Indexing the list performs the evaluation.
         return [handler_list[i] for i in range(len(handler_list))]
 
-    def _resolve_object(self, obj: Union[queue.Queue, ConvertingDict]) -> queue.Queue:
+    def _resolve_object(self, obj: Union[queue.Queue, dict]) -> queue.Queue:
         """
         Resolves an object dynamically, such as a queue or other configuration object.
 
         Args:
-            obj (Union[Queue, ConvertingDict]): The object to resolve.
+            obj (Union[Queue, dict]): The object to resolve.
 
         Returns:
             Queue: The resolved queue or the original object.
@@ -123,23 +143,29 @@ class QueueListenerHandler(QueueHandler):
         Raises:
             ValueError: If the object cannot be resolved.
         """
-        if not isinstance(obj, ConvertingDict):
+        if not isinstance(obj, dict):  # Assuming ConvertingDict behaves like a dict
             return obj
+
         try:
             if "__resolved_value__" in obj:
                 return obj["__resolved_value__"]
 
-            class_name = obj.pop("class")
-            klass = obj.configurator.resolve(class_name)
+            class_name = obj.pop("class", None)
+            if not class_name:
+                raise ValueError("No 'class' key found in object to resolve.")
+
+            klass = resolve_class(class_name)
             properties = obj.pop(".", None)
             kwargs = {k: obj[k] for k in obj if valid_ident(k)}
             result = klass(**kwargs)
+
             if properties:
                 for name, value in properties.items():
                     setattr(result, name, value)
 
             obj["__resolved_value__"] = result
             return result
+
         except Exception as e:
             raise ValueError(f"Error resolving object: {e}") from e
 

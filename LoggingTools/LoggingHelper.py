@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 from pathlib import Path
 from logging import Handler
 from threading import Lock
-from queue import Queue
+import queue
 from logging.handlers import (
     QueueHandler, 
     QueueListener
@@ -67,7 +67,7 @@ class QueueListenerHandler(QueueHandler):
         handlers: List[Handler],
         respect_handler_level: bool = False,
         auto_run: bool = True,
-        queue: Queue = Queue(-1),
+        queue: queue.Queue = queue.Queue(-1),
     ):
         """
         Initializes the QueueListenerHandler.
@@ -110,7 +110,7 @@ class QueueListenerHandler(QueueHandler):
         # Indexing the list performs the evaluation.
         return [handler_list[i] for i in range(len(handler_list))]
 
-    def _resolve_object(self, obj: Union[Queue, ConvertingDict]) -> Queue:
+    def _resolve_object(self, obj: Union[queue.Queue, ConvertingDict]) -> queue.Queue:
         """
         Resolves an object dynamically, such as a queue or other configuration object.
 

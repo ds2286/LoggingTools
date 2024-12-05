@@ -388,7 +388,8 @@ class LoggerFactory:
     def setup_logger(
         self,
         dynamic_log_filename=False,
-        config_dict: dict = {}
+        config_dict: dict = {},
+        files_to_load_dict: dict = {}
     ):
         """
         Complete the process of loading configuration, setting dynamic log file name, 
@@ -397,6 +398,11 @@ class LoggerFactory:
         # log_dir = Path(f"{os.getcwd()}/logs")
         log_dir = Path(self.logger_settings.directory_name)
         log_dir.mkdir(parents=True, exist_ok=True)
+        
+        if files_to_load_dict:
+            for file_name, file_path in files_to_load_dict.items():
+                self.app_config_dict[file_name] = file_path
+        
         self.load_config(config_dict=config_dict)
         
         self.set_log_filename(

@@ -257,6 +257,8 @@ class LoggerFactory:
                 
                 config_path = Path(config_str)
                 print(f"config_path: {config_path}")
+                print(f"config_path.is_file(): {config_path.is_file()}")
+                print(f"config_path.exists(): {config_path.exists()}")
                 if config_path.is_file() and config_path.exists():
                     print(f"config_str: {config_str}")
                     with open(config_str, 'r') as file:

@@ -265,7 +265,7 @@ class LoggerFactory:
                         app_config = yaml.safe_load(file)
                     # Merge application-specific logger configuration with base config
                     self.config = self.merge_dicts(self.config, app_config)
-                
+    
     def set_log_filename(
         self,
         dynamic_log_filename=False
@@ -423,6 +423,21 @@ class LoggerFactory:
         
         return file_paths
     
+    @staticmethod
+    def load_file_content_from_package(
+        package: str, 
+        filename: str
+    ) -> str:
+        """
+        Load the content of a file from a package.
+        
+        :param package: The package containing the file.
+        :param filename: The name of the file to load.
+        :return: The content of the file.
+        """
+        with importlib.resources.open_text(package, filename) as file:
+            return file.read()
+        
     @staticmethod
     def replace_logger_handlers(
         logger: logging.Logger,

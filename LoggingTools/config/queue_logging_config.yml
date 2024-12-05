@@ -1,13 +1,10 @@
-objects:
-  queue:
-    class: queue.Queue
-    maxsize: -1
-
 handlers:
   queue_listener:
     class: LoggingTools.LoggingHelper.QueueListenerHandler
     handlers:
       - cfg://handlers.console
       - cfg://handlers.file
-    queue: cfg://objects.queue
+    queue:
+      class: queue.Queue
+      maxsize: -1
     respect_handler_level: True

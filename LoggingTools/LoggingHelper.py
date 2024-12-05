@@ -1,4 +1,6 @@
 # library
+from __future__ import annotations
+import threading
 from typing import List, Union
 from pathlib import Path
 from logging import Handler
@@ -209,6 +211,8 @@ class LoggerFactory:
     logger.warning("This is a warning message")
     """
     
+    _lock = threading.Lock()
+    
     def __init__(
         self, 
         base_config_path=None, 
@@ -414,6 +418,23 @@ class LoggerFactory:
                     file_paths[filename] = str(file_path)
         
         return file_paths
+    
+    @staticmethod
+    def replace_logger_handlers(
+        logger: logging.Logger,
+        new_handlers: List[Handler]
+    ):
+        """
+        Replace the handlers of a logger with new handlers.
+        
+        :param logger: The logger to modify.
+        :param new_handlers: The new handlers to set for the logger.
+        """
+        with LoggerFactory._lock:
+            for handler in logger.handlers:
+                logger.removeHandler(handler)
+            for handler in new_handlers:
+                logger.addHandler(handler)
     
     def setup_logger(
         self,

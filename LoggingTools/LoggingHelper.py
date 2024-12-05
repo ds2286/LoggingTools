@@ -1,7 +1,8 @@
 # library
 from __future__ import annotations
+import re
 import threading
-from typing import List, Union
+from typing import List, Optional, Union
 from pathlib import Path
 from logging import Handler
 from threading import Lock
@@ -234,7 +235,7 @@ class LoggerFactory:
     
     def load_config(
         self,
-        config_data: dict = {}
+        config_data_dict: dict = {}
     ):
         """
         Loads the base and application-specific logging configuration from YAML files.
@@ -249,8 +250,8 @@ class LoggerFactory:
             base_config = self.merge_dicts(base_config, push_config)
     
         self.config = base_config
-        if config_data:
-            self.config = self.merge_dicts(self.config, config_data)
+        if config_data_dict:
+            self.config = self.merge_dicts(self.config, config_data_dict)
             
         for config_name, config_str in self.app_config_dict.items():
             
@@ -392,8 +393,9 @@ class LoggerFactory:
     @staticmethod
     def load_from_package(
         package: str, 
-        filenames: list[str] = None, 
-        collect_all: bool = False
+        filenames: Optional[list[str]] = None, 
+        collect_all: bool = False, 
+        pattern: Optional[str] = None
     ) -> dict[str, str]:
         """
         Load file paths from a package into a dictionary.
@@ -401,15 +403,20 @@ class LoggerFactory:
         :param package: The package containing the files.
         :param filenames: A list of filenames to retrieve paths for. Ignored if `collect_all` is True.
         :param collect_all: If True, collect paths for all files in the package directory.
+        :param pattern: If provided, collect paths for files matching the regex pattern.
         :return: A dictionary where keys are filenames and values are their paths.
         """
         file_paths = {}
 
-        if collect_all:
-            # Collect all file paths in the package directory
+        if collect_all or pattern:
+            # Collect all or filtered file paths in the package directory
             for file in importlib.resources.files(package).iterdir():
                 if file.is_file():  # Ensure it's a file, not a subdirectory
-                    file_paths[file.name] = str(file)
+                    if pattern:
+                        if re.search(pattern, file.name):  # Check if the file name matches the pattern
+                            file_paths[file.name] = str(file)
+                    elif collect_all:
+                        file_paths[file.name] = str(file)
         elif filenames:
             # Collect specified file paths
             for filename in filenames:
@@ -417,7 +424,7 @@ class LoggerFactory:
                     file_paths[filename] = str(file_path)
         
         return file_paths
-    
+        
     @staticmethod
     def load_yaml_from_package(
         package: str, 
@@ -453,7 +460,7 @@ class LoggerFactory:
     def setup_logger(
         self,
         dynamic_log_filename=False,
-        config_data: dict = {},
+        config_data_dict: dict = {},
         files_to_load_dict: dict = {}
     ):
         """
@@ -468,7 +475,7 @@ class LoggerFactory:
             for file_name, file_path in files_to_load_dict.items():
                 self.app_config_dict[file_name] = file_path
 
-        self.load_config(config_dict=config_data)
+        self.load_config(config_data_dict=config_data_dict)
         
         self.set_log_filename(
             dynamic_log_filename=dynamic_log_filename

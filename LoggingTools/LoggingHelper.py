@@ -256,7 +256,9 @@ class LoggerFactory:
             for config_name, config_str in self.app_config_dict.items():
                 
                 config_path = Path(config_str)
+                print(f"config_path: {config_path}")
                 if config_path.is_file() and config_path.exists():
+                    print(f"config_str: {config_str}")
                     with open(config_str, 'r') as file:
                         app_config = yaml.safe_load(file)
                     # Merge application-specific logger configuration with base config
@@ -453,7 +455,7 @@ class LoggerFactory:
         if files_to_load_dict:
             for file_name, file_path in files_to_load_dict.items():
                 self.app_config_dict[file_name] = file_path
-        print(self.app_config_dict)
+
         self.load_config(config_dict=config_dict)
         
         self.set_log_filename(

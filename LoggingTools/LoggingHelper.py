@@ -51,22 +51,9 @@ FILE_TYPE_CLASSES = [
 
 
 def resolve_class(class_name: str):
-    """
-    Dynamically resolves a class from its full module path.
-
-    Args:
-        class_name (str): The fully qualified class name (e.g., "queue.Queue").
-
-    Returns:
-        type: The resolved class object.
-
-    Raises:
-        ImportError: If the module or class cannot be resolved.
-    """
     try:
         module_name, class_name = class_name.rsplit('.', 1)
         module = importlib.import_module(module_name)
-        print(getattr(module, class_name))
         return getattr(module, class_name)
     except (ImportError, AttributeError) as e:
         raise ImportError(f"Error resolving class {class_name}: {e}") from e
@@ -132,19 +119,7 @@ class QueueListenerHandler(QueueHandler):
         return [handler_list[i] for i in range(len(handler_list))]
 
     def _resolve_object(self, obj: Union[queue.Queue, ConvertingDict]) -> queue.Queue:
-        """
-        Resolves an object dynamically, such as a queue or other configuration object.
-
-        Args:
-            obj (Union[Queue, dict]): The object to resolve.
-
-        Returns:
-            Queue: The resolved queue or the original object.
-
-        Raises:
-            ValueError: If the object cannot be resolved.
-        """
-        if not isinstance(obj, ConvertingDict):  # Assuming ConvertingDict behaves like a dict
+        if not isinstance(obj, ConvertingDict): 
             return obj
 
         try:

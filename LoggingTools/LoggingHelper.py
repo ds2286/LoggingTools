@@ -99,7 +99,6 @@ class QueueListenerHandler(QueueHandler):
             auto_run (bool): Whether to automatically start the listener.
             queue (Queue): The queue used for transferring log records.
         """
-        print(queue)
         queue = self._resolve_object(queue)
         super().__init__(queue)
 
@@ -362,6 +361,7 @@ class LoggerFactory:
         """
         Applies the final logging configuration.
         """
+        print(self.config)
         if self.config:
             dictConfig(self.config)
             self.default_file_handler = logging.getHandlerByName('file')

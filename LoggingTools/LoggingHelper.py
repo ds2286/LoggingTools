@@ -453,7 +453,7 @@ class LoggerFactory:
         if files_to_load_dict:
             for file_name, file_path in files_to_load_dict.items():
                 self.app_config_dict[file_name] = file_path
-        
+        print(self.app_config_dict)
         self.load_config(config_dict=config_dict)
         
         self.set_log_filename(

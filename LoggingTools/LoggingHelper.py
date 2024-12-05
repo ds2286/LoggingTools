@@ -131,7 +131,7 @@ class QueueListenerHandler(QueueHandler):
         # Indexing the list performs the evaluation.
         return [handler_list[i] for i in range(len(handler_list))]
 
-    def _resolve_object(self, obj: Union[queue.Queue, dict]) -> queue.Queue:
+    def _resolve_object(self, obj: Union[queue.Queue, ConvertingDict]) -> queue.Queue:
         """
         Resolves an object dynamically, such as a queue or other configuration object.
 
@@ -144,7 +144,7 @@ class QueueListenerHandler(QueueHandler):
         Raises:
             ValueError: If the object cannot be resolved.
         """
-        if not isinstance(obj, dict):  # Assuming ConvertingDict behaves like a dict
+        if not isinstance(obj, ConvertingDict):  # Assuming ConvertingDict behaves like a dict
             return obj
 
         try:

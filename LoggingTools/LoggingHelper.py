@@ -66,6 +66,7 @@ def resolve_class(class_name: str):
     try:
         module_name, class_name = class_name.rsplit('.', 1)
         module = importlib.import_module(module_name)
+        print(getattr(module, class_name))
         return getattr(module, class_name)
     except (ImportError, AttributeError) as e:
         raise ImportError(f"Error resolving class {class_name}: {e}") from e

@@ -405,7 +405,37 @@ class LoggerFactory:
                 logger.removeHandler(handler)
             for handler in new_handlers:
                 logger.addHandler(handler)
-    
+                
+    def start_configured_queue_listeners(self):
+        """
+        Searches the logging configuration for QueueListeners and starts them.
+
+        This function assumes that QueueListeners are defined and properly associated
+        with QueueHandlers in the logging configuration.
+        """
+        # List to track started listeners
+        started_listeners = []
+
+        # Access all handlers in the current logging configuration
+        for logger_name in logging.root.manager.loggerDict:
+            logger = logging.getLogger(logger_name)
+
+            # Check each handler in the logger
+            for handler in logger.handlers:
+                if hasattr(handler, 'listener') and isinstance(handler.listener, QueueListener):
+                    listener = handler.listener
+
+                    # Start the listener if it hasn't already been started
+                    if not listener._thread or not listener._thread.is_alive():
+                        listener.start()
+                        started_listeners.append(listener)
+                        print(f"Started QueueListener for logger '{logger_name}'")
+
+        # if not started_listeners:
+        #     print("No QueueListeners found or started.")
+        # else:
+        #     print(f"Started {len(started_listeners)} QueueListener(s).")
+        
     def setup_logger(
         self,
         dynamic_log_filename=False,
@@ -431,4 +461,6 @@ class LoggerFactory:
         )
 
         self.apply_config()
+        self.start_configured_queue_listeners()
+        
 

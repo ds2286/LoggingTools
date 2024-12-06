@@ -3,7 +3,7 @@ handlers:
     class: logging.handlers.QueueHandler
     level: INFO
     queue:
-      (): queue.Queue
+      (): multiprocessing.Queue
       maxsize: -1
     listener: logging.handlers.QueueListener
     handlers:

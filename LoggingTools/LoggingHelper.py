@@ -197,7 +197,6 @@ class LoggerFactory:
         """
         Applies the final logging configuration.
         """
-        print(self.config)
         if self.config:
             dictConfig(self.config)
             self.default_file_handler = logging.getHandlerByName('file')

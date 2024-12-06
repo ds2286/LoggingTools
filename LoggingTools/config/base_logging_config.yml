@@ -1,9 +1,10 @@
 version: 1
-disable_existing_loggers: false
+
 formatters:
   standard:
     format: "[%(asctime)s] [%(levelname)s] [%(name)] [%(filename)s:%(lineno)d] - %(message)s"
     datefmt: "%Y-%m-%d %H:%M:%S"
+
 handlers:
   console:
     class: logging.StreamHandler
@@ -35,6 +36,7 @@ handlers:
     interval: 1  # Every 1 day
     backupCount: 7  # Keep the last 7 days' logs
     encoding: 'utf-8'
+
 root:
   level: WARNING
   handlers: [file,console]

@@ -1,6 +1,7 @@
 handlers:
   queue_handler:
     class: logging.handlers.QueueHandler
+    level: INFO
     queue:
       (): queue.Queue
       maxsize: -1

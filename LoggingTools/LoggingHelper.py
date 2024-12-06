@@ -429,7 +429,7 @@ class LoggerFactory:
                     if not listener._thread or not listener._thread.is_alive():
                         listener.start()
                         started_listeners.append(listener)
-                        print(f"Started QueueListener for logger '{logger_name}'")
+                        # print(f"Started QueueListener for logger '{logger_name}'")
 
         # if not started_listeners:
         #     print("No QueueListeners found or started.")

@@ -448,7 +448,6 @@ class LoggerFactory:
         
         for listener in self.started_listeners:
             listener.stop()
-            listener.join()
             # print(f"Stopped QueueListener for logger '{listener.logger.name}'")
         
     

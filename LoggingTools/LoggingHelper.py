@@ -288,17 +288,27 @@ class LoggerFactory:
     @staticmethod
     def load_yaml_from_package(
         package: str, 
-        filename: str
+        filename: Union[str, List[str]]
     ) -> dict:
         """
         Load the content of a YAML file from a package into a dictionary.
         
         :param package: The package containing the file.
-        :param filename: The name of the file to load.
-        :return: The content of the file.
+        :param filename: The name of the file, or list of files, to load.
+        :return: The content of the file(s).
         """
-
-        return yaml.safe_load(importlib.resources.open_text(package, filename))
+        if isinstance(filename, list):
+            
+            data_dict = {}
+            for item in filename:
+                data_dict = LoggerFactory.merge_dicts(
+                    data_dict, 
+                    yaml.safe_load(importlib.resources.open_text(package, item))
+                )
+            return data_dict
+        else:
+            return yaml.safe_load(importlib.resources.open_text(package, filename))
+            
     
     @staticmethod
     def duplicate_handler(

@@ -1,7 +1,11 @@
 handlers:
-  queue_listener:
-    class: LoggingTools.LoggingHelper.QueueListenerHandler
+  queue_handler:
+    class: logging.handlers.QueueHandler
+    queue:
+      (): queue.Queue
+      maxsize: -1
+    listener: logging.handlers.QueueListener
     handlers:
       - console
       - file
-    respect_handler_level: True
+      

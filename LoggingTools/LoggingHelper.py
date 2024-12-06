@@ -92,6 +92,7 @@ class LoggerFactory:
         self.app_config_dict = app_config_dict or self.logger_settings.app_config_dict
         self.config = None
         self.default_file_handler = None
+        self.started_listeners = []
     
     def load_config(
         self,
@@ -413,8 +414,6 @@ class LoggerFactory:
         This function assumes that QueueListeners are defined and properly associated
         with QueueHandlers in the logging configuration.
         """
-        # List to track started listeners
-        started_listeners = []
 
         # Access all handlers in the current logging configuration
         for logger_name in logging.root.manager.loggerDict:
@@ -428,14 +427,31 @@ class LoggerFactory:
                     # Start the listener if it hasn't already been started
                     if not listener._thread or not listener._thread.is_alive():
                         listener.start()
-                        started_listeners.append(listener)
+                        self.started_listeners.append(listener)
                         # print(f"Started QueueListener for logger '{logger_name}'")
 
+        atexit.register(self.stop_queue_listener)
         # if not started_listeners:
         #     print("No QueueListeners found or started.")
         # else:
         #     print(f"Started {len(started_listeners)} QueueListener(s).")
+    
+    def stop_queue_listener(self):
+        """
+        Searches the logging configuration for QueueListeners and stops them.
         
+        This function assumes that QueueListeners are defined and properly associated
+        with QueueHandlers in the logging configuration.
+        """
+        if not self.started_listeners:
+            return
+        
+        for listener in self.started_listeners:
+            listener.stop()
+            listener.join()
+            # print(f"Stopped QueueListener for logger '{listener.logger.name}'")
+        
+    
     def setup_logger(
         self,
         dynamic_log_filename=False,

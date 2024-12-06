@@ -9,14 +9,11 @@ from threading import Lock
 from queue import Queue
 from logging.handlers import (
     QueueHandler, 
-    QueueListener
+    QueueListener,
+    RotatingFileHandler,
+    TimedRotatingFileHandler
 )
-from logging.config import (
-    ConvertingList,
-    ConvertingDict,
-    dictConfig,
-    valid_ident
-)
+from logging.config import dictConfig
 import importlib.resources
 import logging.config
 import logging
@@ -302,7 +299,86 @@ class LoggerFactory:
         """
 
         return yaml.safe_load(importlib.resources.open_text(package, filename))
-        
+    
+    @staticmethod
+    def duplicate_handler(
+        original_handler: logging.Handler,
+        new_filename: Optional[str] = None,
+        new_level: Optional[int] = None,
+        new_formatter: Optional[logging.Formatter] = None,
+        **kwargs
+    ) -> logging.Handler:
+        """
+        Duplicates an existing handler with optional customizations.
+
+        Args:
+            original_handler (logging.Handler): The handler to copy.
+            new_filename (str, optional): The filename for the new handler (if applicable).
+            new_level (int, optional): The logging level for the new handler.
+            new_formatter (logging.Formatter, optional): The formatter for the new handler.
+            **kwargs: Additional arguments to customize specialized handlers.
+
+        Returns:
+            logging.Handler: A new handler based on the original with customizations.
+        """
+        # Determine the type of the original handler
+        if isinstance(original_handler, logging.FileHandler):
+            # Create a FileHandler (or derived type) with optional new filename
+            original_filename = getattr(original_handler, "baseFilename", None)
+            parent_dir = os.path.dirname(original_filename) if original_filename else "."
+            just_filename = os.path.basename(original_filename) if original_filename else "logfile.log"
+            filename = new_filename or os.path.join(parent_dir, "fallback", just_filename)
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+            # Handle specific file-based handlers
+            if isinstance(original_handler, RotatingFileHandler):
+                new_handler = RotatingFileHandler(
+                    filename,
+                    maxBytes=kwargs.get("maxBytes", original_handler.maxBytes),
+                    backupCount=kwargs.get("backupCount", original_handler.backupCount),
+                    encoding=kwargs.get("encoding", original_handler.encoding),
+                    delay=kwargs.get("delay", original_handler.delay),
+                )
+            elif isinstance(original_handler, TimedRotatingFileHandler):
+                new_handler = TimedRotatingFileHandler(
+                    filename,
+                    when=kwargs.get("when", original_handler.when),
+                    interval=kwargs.get("interval", original_handler.interval),
+                    backupCount=kwargs.get("backupCount", original_handler.backupCount),
+                    encoding=kwargs.get("encoding", original_handler.encoding),
+                    delay=kwargs.get("delay", original_handler.delay),
+                    utc=kwargs.get("utc", original_handler.utc),
+                )
+            else:
+                # Default to a standard FileHandler
+                new_handler = logging.FileHandler(filename)
+
+        elif isinstance(original_handler, logging.StreamHandler):
+            # Create a new StreamHandler
+            new_handler = logging.StreamHandler(stream=kwargs.get("stream", original_handler.stream))
+
+        elif isinstance(original_handler, logging.NullHandler):
+            # Create a NullHandler
+            new_handler = logging.NullHandler()
+
+        elif isinstance(original_handler, logging.handlers.QueueHandler):
+            # Create a QueueHandler
+            queue = kwargs.get("queue", original_handler.queue)
+            new_handler = logging.handlers.QueueHandler(queue)
+
+        else:
+            raise ValueError(f"Unsupported handler type: {type(original_handler).__name__}")
+
+        # Copy attributes from the original handler
+        new_handler.setLevel(new_level or original_handler.level)
+        new_handler.setFormatter(new_formatter or getattr(original_handler, "formatter", None))
+
+        # Copy filters from the original handler
+        for filt in original_handler.filters:
+            new_handler.addFilter(filt)
+
+        return new_handler
+    
     @staticmethod
     def replace_logger_handlers(
         logger: logging.Logger,

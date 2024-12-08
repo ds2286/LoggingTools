@@ -129,7 +129,7 @@ class LoggerSettings(BaseSettings):
 
         if not values.get("push_config_path"):
             values["push_config_path"] = cls.resolve_file_path(
-                "process_logging_config.yml", package
+                "push_logging_config.yml", package
             )
         
         return values

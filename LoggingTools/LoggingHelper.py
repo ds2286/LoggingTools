@@ -77,7 +77,7 @@ class LoggerFactory:
     def __init__(
         self, 
         base_config_path=None, 
-        app_config_dict={},
+        logging_file_dict={},
         logger_settings: LoggerSettings=None
     ):
         """
@@ -89,7 +89,7 @@ class LoggerFactory:
             _env_file=os.getenv("ENV_PATH")
         )
         self.base_config_path = base_config_path or self.logger_settings.base_config_path
-        self.app_config_dict = app_config_dict or self.logger_settings.app_config_dict
+        self.logging_file_dict = logging_file_dict or self.logger_settings.file_paths.config_dict
         self.config = None
         self.default_file_handler = None
         self.started_listeners = []
@@ -114,7 +114,7 @@ class LoggerFactory:
         if config_data_dict:
             self.config = self.merge_dicts(self.config, config_data_dict)
             
-        for config_name, config_str in self.app_config_dict.items():
+        for config_name, config_str in self.logging_file_dict.items():
             
             config_path = Path(config_str)
             if config_path.is_file() and config_path.exists():
@@ -467,7 +467,7 @@ class LoggerFactory:
         
         if files_to_load_dict:
             for file_name, file_path in files_to_load_dict.items():
-                self.app_config_dict[file_name] = file_path
+                self.logging_file_dict[file_name] = file_path
 
         self.load_config(config_data_dict=config_data_dict)
         

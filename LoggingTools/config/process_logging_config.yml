@@ -1,6 +1,6 @@
 loggers:
   process_logger:
     level: INFO
-    handlers: [queue_handler]
+    handlers: [file,console]
     propagate: no
     filename: log_processing.log

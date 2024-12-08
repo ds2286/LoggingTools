@@ -5,6 +5,7 @@ from typing import (
     Optional,
     Dict
 )
+import os
 
 # installed
 from pydantic_settings import (
@@ -27,23 +28,23 @@ class LoggingConfigFiles(BaseSettings):
     
     @model_validator(mode="before")
     def populate_dict(cls, values):
+        
         if not values:
             values = {}
-            values["config_dict"] = {}
-            return values
-        
-        prefix = "LOG_APP_"
+
+        prefix = cls.Config.env_prefix.lower()
         config_dict = {
             key[len(prefix):]: value
             for key, value in values.items()
             if key.startswith(prefix)
         }
+        
         values["config_dict"] = config_dict
         return values
     
     class Config:
         env_file = "config/env/.env"
-        env_prefix = "LOG_APP_"
+        env_prefix = "CONF_LOG_"
         extra = "ignore"
 
 class LoggerSettings(BaseSettings):
@@ -58,7 +59,7 @@ class LoggerSettings(BaseSettings):
         env="PUSH_CONFIG_PATH"
     )
     file_paths: LoggingConfigFiles = Field(
-        None, 
+        ..., 
         description="Application-specific logging configuration"
     )
     directory_name: str = Field(
@@ -120,7 +121,6 @@ class LoggerSettings(BaseSettings):
             dict: Updated field values with resolved file paths.
         """
         package = "LoggingTools.config"
-
         
         if not values.get("base_config_path"):
             values["base_config_path"] = cls.resolve_file_path(
@@ -131,7 +131,14 @@ class LoggerSettings(BaseSettings):
             values["push_config_path"] = cls.resolve_file_path(
                 "process_logging_config.yml", package
             )
-
+        
+        return values
+    
+    @model_validator(mode="before")
+    def load_config_files(cls, values):
+        
+        values["file_paths"] = LoggingConfigFiles.populate_dict(values)
+        
         return values
     
 class S3Settings(BaseSettings):

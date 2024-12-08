@@ -2,7 +2,7 @@
 from __future__ import annotations
 import re
 import threading
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from pathlib import Path
 from logging import Handler
 from threading import Lock
@@ -436,6 +436,106 @@ class LoggerFactory:
         # else:
         #     print(f"Started {len(started_listeners)} QueueListener(s).")
     
+    @staticmethod
+    def get_all_handlers_in_config(config: Dict[str, Any]) -> Dict[str, List[str]]:
+        """
+        Extracts handlers defined in the logger configuration dictionary.
+
+        Args:
+            config (Dict[str, Any]): The logger configuration dictionary.
+
+        Returns:
+            Dict[str, List[str]]: A dictionary with logger names as keys and their handlers as values.
+        """
+        handlers_by_logger = {}
+        loggers_config = config.get("loggers", {})
+
+        for logger_name, logger_config in loggers_config.items():
+            handlers = logger_config.get("handlers", [])
+            handlers_by_logger[logger_name] = handlers
+
+        return handlers_by_logger
+    
+    def validate_logger_config(
+        self
+    ) -> Dict[str, List[str]]:
+        """
+        Validates the logger configuration dictionary by comparing its handlers
+        to the available handlers.
+
+        Args:
+            config (Dict[str, Any]): The logger configuration dictionary.
+            available_handlers (List[str]): List of all available handler names.
+
+        Returns:
+            Dict[str, List[str]]: A dictionary of loggers with unconfigured handlers.
+
+        Raises:
+            ValueError: If a logger uses handlers not defined in the available handlers.
+        """
+        unconfigured_handlers = {}
+        handlers_by_logger = LoggerFactory.get_all_handlers_in_config(self.config)
+        available_handlers = self.validate_handler_config(self.config)
+
+        for logger_name, handlers in handlers_by_logger.items():
+            unmatched = [handler for handler in handlers if handler not in available_handlers]
+            if unmatched:
+                
+                try:
+                    for handler_name in unmatched:
+                        handler_dict = LoggerFactory.load_from_package(
+                            package="LoggingTools.config", 
+                            pattern=handler_name
+                        )
+                        if handler_dict:
+                            for path in handler_dict.values():
+                                results = LoggerFactory.load_yaml_from_package(
+                                    package="LoggingTools.config", 
+                                    filename=path
+                                )
+                                if results:
+                                    self.config = self.merge_dicts(self.config, results)
+                                    unmatched.remove(handler_name)
+                        
+                except Exception as e:
+                    pass
+                
+                if unmatched:
+                    unconfigured_handlers[logger_name] = unmatched
+
+        if unconfigured_handlers:
+            raise ValueError(
+                f"Unconfigured handlers detected in loggers: {unconfigured_handlers}"
+            )
+
+        return unconfigured_handlers
+
+    @staticmethod
+    def validate_handler_config(
+        config: Dict[str, Any]
+    ) -> List[str]:
+        """
+        Validates if all handlers defined in the configuration dictionary are properly configured.
+
+        Args:
+            config (Dict[str, Any]): The logger configuration dictionary.
+
+        Returns:
+            List[str]: List of all properly configured handler names.
+
+        Raises:
+            ValueError: If a handler is improperly configured.
+        """
+        configured_handlers = []
+        handlers_config = config.get("handlers", {})
+
+        for handler_name, handler_config in handlers_config.items():
+            if not handler_config.get("class"):
+                raise ValueError(f"Handler '{handler_name}' is missing the 'class' field.")
+            configured_handlers.append(handler_name)
+
+        return configured_handlers
+    
     def stop_queue_listener(self):
         """
         Searches the logging configuration for QueueListeners and stops them.
@@ -474,7 +574,8 @@ class LoggerFactory:
         self.set_log_filename(
             dynamic_log_filename=dynamic_log_filename
         )
-
+        self.validate_logger_config()
+        
         self.apply_config()
         self.start_configured_queue_listeners()
         
